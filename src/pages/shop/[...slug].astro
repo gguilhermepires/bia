@@ -1,0 +1,60 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import Gallery from '../../components/Gallery.astro';
+import { u, eur } from '../../lib/url';
+import { site } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('products', (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry, others: all.filter((o) => o.id !== entry.id).slice(0, 3) } }));
+}
+const { entry, others } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const images = d.images.length ? d.images : [d.cover];
+const digital = d.type === 'digital';
+const canBuy = !d.soldOut && !!d.buyUrl;
+---
+<Base title={d.title} description={d.summary} current="shop" image={d.cover}>
+  <div class="crumbs"><a href={u('/')}>Início</a> / <a href={u('/shop/')}>Loja</a> / {d.title}</div>
+  <div class="detail">
+    <Gallery images={images} alt={d.title} />
+    <div class="info">
+      <div class="kicker">{digital ? 'Produto digital' : 'Produto físico'}<button class="copy" type="button">Copiar link</button></div>
+      <h1>{d.title}</h1>
+      <p class="lead">{d.summary}</p>
+      <div class="price-big">{eur(d.price)}</div>
+      <div class="longtext"><Content /></div>
+      <button class="readmore" type="button">Ler mais</button>
+      <dl class="facts">
+        <dt>Tipo</dt><dd>{digital ? 'Download digital' : 'Envio por correio'}</dd>
+        {d.details && <><dt>Detalhes</dt><dd>{d.details}</dd></>}
+      </dl>
+      {d.soldOut
+        ? <span class="btn disabled">Esgotado</span>
+        : canBuy
+          ? <a class="btn pink" href={d.buyUrl} rel="noopener">Comprar agora</a>
+          : <a class="btn" href={`mailto:${site.email}?subject=${encodeURIComponent('Encomenda: ' + d.title)}`}>Encomendar por email</a>}
+      <p class="note">
+        {digital
+          ? 'Recebes o link de download por email logo após o pagamento.'
+          : 'Envio e portes calculados no pagamento. Consulta os termos e devoluções.'}
+        <a href={u('/terms/')}> Termos</a>
+      </p>
+    </div>
+  </div>
+
+  {others.length > 0 && (
+    <section class="block">
+      <div class="section-head"><h2 class="title">Também te pode interessar</h2></div>
+      <div class="grid">
+        {others.map((p) => (
+          <Card href={u(`/shop/${p.id}/`)} title={p.data.title} image={p.data.cover} price={p.data.price}
+            tag={p.data.type === 'digital' ? 'Digital' : 'Físico'} soldOut={p.data.soldOut} />
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

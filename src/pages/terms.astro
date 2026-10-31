@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../lib/site';
+---
+<Base title="Termos e devoluções">
+  <article class="prose">
+    <h1>Termos e devoluções</h1>
+    <p><strong>Modelo provisório — rever com a informação real e, se necessário, com apoio jurídico/contabilístico antes de vender.</strong></p>
+    <h2>Quem vende</h2>
+    <p>{site.name} — [nome legal, NIF, morada]. Contacto: {site.email}.</p>
+    <h2>Preços e IVA</h2>
+    <p>Os preços incluem IVA à taxa aplicável, salvo indicação em contrário.</p>
+    <h2>Envios (produtos físicos)</h2>
+    <p>[Prazos de preparação, transportadora, países, custos de envio.]</p>
+    <h2>Produtos digitais</h2>
+    <p>[Como é feita a entrega, formatos e licença de utilização.]</p>
+    <h2>Devoluções e direito de livre resolução</h2>
+    <p>[Prazo para devolução de produtos físicos (14 dias na UE para vendas à distância), quem paga o envio, reembolso. Para digitais, indicar quando o direito de livre resolução cessa.]</p>
+    <h2>Dados pessoais</h2>
+    <p>[Que dados são tratados (encomenda, envio, faturação), por quem e durante quanto tempo.]</p>
+  </article>
+</Base>

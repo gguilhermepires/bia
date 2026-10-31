@@ -1,0 +1,9 @@
+---
+import { site } from '../lib/site';
+const words = [...site.marquee, ...site.marquee];
+---
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    {words.map((w) => <span>{w} ✺</span>)}
+  </div>
+</div>

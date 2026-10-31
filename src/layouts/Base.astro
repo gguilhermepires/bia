@@ -1,0 +1,134 @@
+---
+import '../styles/global.css';
+import { site } from '../lib/site';
+import { u } from '../lib/url';
+interface Props { title?: string; description?: string; current?: string; image?: string }
+const { title, description = site.description, current = '', image } = Astro.props;
+const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — Design & Loja`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const og = image ? new URL(u(image), Astro.site).href : undefined;
+---
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {og && <meta property="og:image" content={og} />}
+    <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
+  </head>
+  <body>
+    <div id="progress"></div>
+    <div id="glow"></div>
+    <div class="pattern-strip" aria-hidden="true"></div>
+    <div class="wrap">
+      <header class="site">
+        <a class="logo" href={u('/')}>{site.name}<span>.</span></a>
+        <nav class="main" aria-label="Principal">
+          <a href={u('/projects/')} aria-current={current === 'projects' ? 'page' : undefined}>Projetos</a>
+          <a href={u('/shop/')} aria-current={current === 'shop' ? 'page' : undefined}>Loja</a>
+          <a href={u('/#sobre')}>Sobre</a>
+          <a href={u('/#contacto')}>Contacto</a>
+        </nav>
+      </header>
+      <main>
+        <slot />
+      </main>
+      <footer class="site">
+        <div class="row">
+          <div>© {new Date().getFullYear()} {site.name} · {site.location}</div>
+          <div>
+            <a href={u('/terms/')}>Termos e devoluções</a>
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const touch = matchMedia('(pointer: coarse)').matches;
+
+      // Aparecer ao fazer scroll
+      const items = document.querySelectorAll('.section-head, .card, .about > *, .contact > *, .detail > *');
+      if (!reduce) {
+        items.forEach((el, i) => {
+          el.classList.add('reveal');
+          if (el.classList.contains('card')) (el as HTMLElement).style.transitionDelay = (i % 3) * 120 + 'ms';
+        });
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12 });
+        items.forEach((el) => io.observe(el));
+      }
+
+      // Barra de progresso
+      const bar = document.getElementById('progress') as HTMLElement;
+      addEventListener('scroll', () => {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        bar.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + '%';
+      }, { passive: true });
+
+      if (!reduce && !touch) {
+        // Brilho que segue o rato
+        const glow = document.getElementById('glow') as HTMLElement;
+        addEventListener('mousemove', (e) => {
+          glow.style.opacity = '1';
+          glow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        });
+        // Inclinação 3D nos cartões
+        document.querySelectorAll<HTMLElement>('.card').forEach((card) => {
+          const thumb = card.querySelector<HTMLElement>('.thumb');
+          if (!thumb) return;
+          card.addEventListener('mousemove', (e) => {
+            const r = thumb.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            thumb.style.transition = 'transform .08s';
+            thumb.style.transform = `rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateY(-4px)`;
+          });
+          card.addEventListener('mouseleave', () => {
+            thumb.style.transition = 'transform .4s';
+            thumb.style.transform = '';
+          });
+        });
+      }
+
+      // Galeria (miniaturas)
+      document.querySelectorAll<HTMLElement>('.gallery').forEach((g) => {
+        const main = g.querySelector<HTMLImageElement>('.main img');
+        g.querySelectorAll<HTMLButtonElement>('.thumbs button').forEach((b) => {
+          b.addEventListener('click', () => {
+            if (main) { main.src = b.dataset.src!; main.alt = b.dataset.alt || ''; }
+            g.querySelectorAll('.thumbs button').forEach((x) => x.classList.remove('active'));
+            b.classList.add('active');
+          });
+        });
+      });
+
+      // "Ler mais"
+      document.querySelectorAll<HTMLButtonElement>('.readmore').forEach((btn) => {
+        const box = btn.previousElementSibling as HTMLElement;
+        btn.addEventListener('click', () => {
+          const open = box.classList.toggle('open');
+          btn.textContent = open ? 'Ler menos' : 'Ler mais';
+        });
+      });
+
+      // Copiar link
+      document.querySelectorAll<HTMLButtonElement>('.copy').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(location.href); btn.textContent = 'Copiado!'; }
+          catch { btn.textContent = 'Copia da barra'; }
+          setTimeout(() => (btn.textContent = 'Copiar link'), 1800);
+        });
+      });
+    </script>
+  </body>
+</html>

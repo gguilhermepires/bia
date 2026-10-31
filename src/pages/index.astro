@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import Marquee from '../components/Marquee.astro';
+import { site } from '../lib/site';
+import { u } from '../lib/url';
+
+const sort = (a: any, b: any) => a.data.order - b.data.order;
+const projects = (await getCollection('projects', (p) => !p.data.draft)).sort(sort).slice(0, 3);
+const products = (await getCollection('products', (p) => !p.data.draft)).sort(sort).slice(0, 4);
+---
+<Base>
+  <section class="hero">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <h1>{site.tagline.split(' ').slice(0, 3).join(' ')} <em>{site.tagline.split(' ').slice(3).join(' ')}</em></h1>
+    <p>Identidade visual, design editorial e ilustração — e uma loja com prints e recursos para levares para casa.</p>
+    <div class="cta">
+      <a class="btn" href={u('/projects/')}>Ver projetos</a>
+      <a class="btn pink" href={u('/shop/')}>Visitar a loja</a>
+    </div>
+  </section>
+
+  <Marquee />
+
+  <section class="block" id="projetos">
+    <div class="section-head">
+      <h2 class="title">Projetos</h2>
+      <a class="more" href={u('/projects/')}>Ver todos →</a>
+    </div>
+    <div class="grid">
+      {projects.map((p) => (
+        <Card href={u(`/projects/${p.id}/`)} title={p.data.title} image={p.data.cover} meta={`${p.data.category} · ${p.data.year}`} />
+      ))}
+    </div>
+  </section>
+
+  <section class="block" id="loja">
+    <div class="section-head">
+      <h2 class="title">Loja</h2>
+      <a class="more" href={u('/shop/')}>Ver tudo →</a>
+    </div>
+    <div class="grid">
+      {products.map((p) => (
+        <Card
+          href={u(`/shop/${p.id}/`)}
+          title={p.data.title}
+          image={p.data.cover}
+          price={p.data.price}
+          tag={p.data.type === 'digital' ? 'Digital' : 'Físico'}
+          soldOut={p.data.soldOut}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="block" id="sobre">
+    <div class="section-head"><h2 class="title">Sobre</h2></div>
+    <div class="about">
+      <div class="photo"><img src={u('/images/mabi.svg')} alt={`Retrato de ${site.name}`} /></div>
+      <div>
+        <p>Olá, eu sou a {site.name}. Escreve aqui uma apresentação curta: há quanto tempo trabalhas em design, o que te inspira e o tipo de projetos que gostas de fazer.</p>
+        <p>Um segundo parágrafo sobre o teu processo e o que os clientes podem esperar.</p>
+        <div class="chips">
+          {['Illustrator', 'Photoshop', 'InDesign', 'Procreate', 'Figma'].map((s) => <span>{s}</span>)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block contact" id="contacto">
+    <div class="section-head"><h2 class="title">Vamos trabalhar juntos?</h2></div>
+    <a class="big" href={`mailto:${site.email}`}>{site.email}</a>
+    <div class="socials">
+      {site.socials.map((s) => <a href={s.url} target="_blank" rel="noopener">{s.label}</a>)}
+    </div>
+  </section>
+</Base>

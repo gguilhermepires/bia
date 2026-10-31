@@ -1,0 +1,17 @@
+---
+import { u } from '../lib/url';
+interface Props { images: string[]; alt: string }
+const { images, alt } = Astro.props;
+---
+<div class="gallery">
+  <div class="main"><img src={u(images[0])} alt={alt} /></div>
+  {images.length > 1 && (
+    <div class="thumbs">
+      {images.map((img, i) => (
+        <button type="button" class={i === 0 ? 'active' : ''} data-src={u(img)} data-alt={`${alt} — ${i + 1}`} aria-label={`Imagem ${i + 1}`}>
+          <img src={u(img)} alt="" loading="lazy" />
+        </button>
+      ))}
+    </div>
+  )}
+</div>

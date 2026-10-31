@@ -1,0 +1,14 @@
+---
+import { u, eur } from '../lib/url';
+interface Props { href: string; title: string; image: string; meta?: string; price?: number; tag?: string; soldOut?: boolean }
+const { href, title, image, meta, price, tag, soldOut } = Astro.props;
+---
+<a class="card" href={href}>
+  <div class="thumb">
+    <img src={u(image)} alt={title} loading="lazy" />
+    {tag && <span class="tag">{tag}</span>}
+    {soldOut && <span class="tag sold">Esgotado</span>}
+  </div>
+  <h3>{title}</h3>
+  <div class="meta">{meta}{price !== undefined && <> <span class="price">{eur(price)}</span></>}</div>
+</a>

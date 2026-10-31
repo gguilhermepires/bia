@@ -1,0 +1,48 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import Gallery from '../../components/Gallery.astro';
+import { u } from '../../lib/url';
+import { site } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('projects', (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry, others: all.filter((o) => o.id !== entry.id).slice(0, 3) } }));
+}
+const { entry, others } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const images = d.images.length ? d.images : [d.cover];
+---
+<Base title={d.title} description={d.summary} current="projects" image={d.cover}>
+  <div class="crumbs"><a href={u('/')}>Início</a> / <a href={u('/projects/')}>Projetos</a> / {d.title}</div>
+  <div class="detail">
+    <Gallery images={images} alt={d.title} />
+    <div class="info">
+      <div class="kicker">{d.category} · {d.year}<button class="copy" type="button">Copiar link</button></div>
+      <h1>{d.title}</h1>
+      <p class="lead">{d.summary}</p>
+      <div class="longtext"><Content /></div>
+      <button class="readmore" type="button">Ler mais</button>
+      <dl class="facts">
+        <dt>Categoria</dt><dd>{d.category}</dd>
+        <dt>Ano</dt><dd>{d.year}</dd>
+        {d.client && <><dt>Cliente</dt><dd>{d.client}</dd></>}
+        {d.tools.length > 0 && <><dt>Ferramentas</dt><dd>{d.tools.join(', ')}</dd></>}
+      </dl>
+      <a class="btn pink" href={`mailto:${site.email}?subject=${encodeURIComponent('Projeto: ' + d.title)}`}>Pedir um projeto semelhante</a>
+    </div>
+  </div>
+
+  {others.length > 0 && (
+    <section class="block">
+      <div class="section-head"><h2 class="title">Outros projetos</h2></div>
+      <div class="grid">
+        {others.map((p) => (
+          <Card href={u(`/projects/${p.id}/`)} title={p.data.title} image={p.data.cover} meta={`${p.data.category} · ${p.data.year}`} />
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

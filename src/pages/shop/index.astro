@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import { u } from '../../lib/url';
+const products = (await getCollection('products', (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="Loja" current="shop" description="Prints, postais e recursos digitais.">
+  <div class="crumbs"><a href={u('/')}>Início</a> / Loja</div>
+  <div class="section-head"><h1 class="title" style="font-family:var(--head);font-size:clamp(2.4rem,7vw,4.4rem)">Loja</h1></div>
+  <div class="grid">
+    {products.map((p) => (
+      <Card href={u(`/shop/${p.id}/`)} title={p.data.title} image={p.data.cover} price={p.data.price}
+        tag={p.data.type === 'digital' ? 'Digital' : 'Físico'} soldOut={p.data.soldOut} />
+    ))}
+  </div>
+</Base>

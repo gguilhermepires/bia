@@ -1,0 +1,58 @@
+# Configuração do Pages CMS (https://pagescms.org): painel para a Mabi
+# adicionar projetos e produtos sem mexer em código.
+media:
+  input: public/uploads
+  output: /uploads
+
+content:
+  - name: projects
+    label: Projetos
+    type: collection
+    path: src/content/projects
+    filename: "{primary}.md"
+    view:
+      fields: [title, category, year]
+      primary: title
+      sort: [order]
+    fields:
+      - { name: title, label: Título, type: string, required: true }
+      - { name: category, label: Categoria (ex. Identidade visual), type: string, required: true }
+      - { name: year, label: Ano, type: number, required: true }
+      - { name: client, label: Cliente, type: string }
+      - { name: summary, label: Resumo (uma frase), type: text, required: true }
+      - { name: cover, label: Imagem de capa, type: image, required: true }
+      - { name: images, label: Galeria de imagens, type: image, list: true }
+      - { name: tools, label: Ferramentas, type: string, list: true }
+      - { name: order, label: Ordem (1 aparece primeiro), type: number }
+      - { name: draft, label: Rascunho (não publicar), type: boolean }
+      - { name: body, label: Descrição completa, type: rich-text }
+
+  - name: products
+    label: Loja
+    type: collection
+    path: src/content/products
+    filename: "{primary}.md"
+    view:
+      fields: [title, price, type, soldOut]
+      primary: title
+      sort: [order]
+    fields:
+      - { name: title, label: Nome do produto, type: string, required: true }
+      - { name: price, label: Preço (€), type: number, required: true }
+      - name: type
+        label: Tipo
+        type: select
+        required: true
+        options:
+          values:
+            - { value: physical, label: Físico (envio) }
+            - { value: digital, label: Digital (download) }
+      - { name: summary, label: Resumo (uma frase), type: text, required: true }
+      - { name: cover, label: Imagem de capa, type: image, required: true }
+      - { name: images, label: Galeria de imagens, type: image, list: true }
+      - { name: details, label: Detalhes (medidas, formato...), type: string }
+      - { name: buyUrl, label: Link de pagamento (Stripe, Lemon Squeezy...), type: string }
+      - { name: soldOut, label: Esgotado, type: boolean }
+      - { name: order, label: Ordem, type: number }
+      - { name: draft, label: Rascunho (não publicar), type: boolean }
+      - { name: body, label: Descrição completa, type: rich-text }
